@@ -5,12 +5,13 @@ import cors from "cors";
 
 import "dotenv/config";
 import fs from "fs";
-import path from "path"
+import path from "path";
 
 import { clerkMiddleware } from "@clerk/express";
 
 import User from "./models/user.model.js";
 import { connectDB } from "./lib/db.js";
+import job from "./lib/cron.js";
 
 //ini
 const app = express();
@@ -21,9 +22,8 @@ const publicDir = path.join(process.cwd(), "public");
 
 // Middlewares
 app.use(express.json());
-app.use(cors({origin:FRONTEND_URL,credentials:true}));
+app.use(cors({ origin: FRONTEND_URL, credentials: true }));
 app.use(clerkMiddleware());
-
 
 //routes
 app.get("/health", (req, res) => {
@@ -37,11 +37,13 @@ if (fs.existsSync(publicDir)) {
 
   app.get("/{*any}", (req, res, next) => {
     res.sendFile(path.join(publicDir, "index.html"), (err) => next(err));
-  })
+  });
 }
 
 //configs
 app.listen(PORT, () => {
   connectDB();
   console.log("Shits Running on -> http://localhost:%s", PORT);
+
+  if (process.env.NODE_ENV === "production") job.start();
 });
