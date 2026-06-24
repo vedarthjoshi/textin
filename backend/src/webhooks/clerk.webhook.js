@@ -34,14 +34,14 @@ router.post("/", async (req, res) => {
           ?.email_address ?? u.email_addresses?.[0]?.email_address;
 
       const fullName =
-        [u.first_name, u.last_name].fill(Boolean).join(" ") ||
+        [u.first_name, u.last_name].filter(Boolean).join(" ") ||
         u.username ||
         email?.split("@")[0] ||
         "Clerk User";
 
       await User.findOneAndUpdate(
         { clerkId: u.id },
-        { clerkId: u.id, email, fullName, profilePic: u.image_ur },
+        { clerkId: u.id, email, fullName, profilePic: u.image_url },
         { new: true, upsert: true, setDefaultsOnInsert: true },
       );
     }
