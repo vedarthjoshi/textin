@@ -12,7 +12,9 @@ import { clerkMiddleware } from "@clerk/express";
 import User from "./models/user.model.js";
 import { connectDB } from "./lib/db.js";
 import job from "./lib/cron.js";
-import clerkWebhook from "./webhooks/clerk.webhook.js"
+
+import clerkWebhook from "./webhooks/clerk.webhook.js";
+import authRoutes from "./routes/auth.route.js";
 
 //ini
 const app = express();
@@ -22,7 +24,11 @@ const FRONTEND_URL = process.env.FRONTEND_URL;
 const publicDir = path.join(process.cwd(), "public");
 
 //WebHooks
-app.use("/api/webhooks/clerk", express.raw({type:"application/json"}),clerkWebhook)
+app.use(
+  "/api/webhooks/clerk",
+  express.raw({ type: "application/json" }),
+  clerkWebhook,
+);
 
 // Middlewares
 app.use(express.json());
@@ -33,6 +39,8 @@ app.use(clerkMiddleware());
 app.get("/health", (req, res) => {
   res.status(200).json({ ok: true });
 });
+
+app.get("/api/auth", authRoutes);
 
 // if public dir exists serve the static files
 // ts for production build
